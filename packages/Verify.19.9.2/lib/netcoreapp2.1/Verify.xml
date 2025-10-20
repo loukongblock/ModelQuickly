@@ -1,0 +1,721 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Verify</name>
+    </assembly>
+    <members>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForRuntime">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UseSplitModeForUniqueDirectory">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForTargetFramework">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForTargetFrameworkAndVersion">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForAssemblyConfiguration">
+            <summary>
+            Use the current test assembly configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForTargetFramework(System.Reflection.Assembly)">
+            <summary>
+            Use <paramref name="assembly" /> TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForTargetFrameworkAndVersion(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForAssemblyConfiguration(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForRuntimeAndVersion">
+            <summary>
+            Use the current runtime and runtime version to make the test results unique.
+            Used when a test produces different results based on runtime and runtime version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForArchitecture">
+            <summary>
+            Use the current processor architecture (x86/x64/arm/arm64) to make the test results unique.
+            Used when a test produces different results based on processor architecture.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.UniqueForOSPlatform">
+            <summary>
+            Use the operating system family (Linux/Windows/OSX) to make the test results unique.
+            Used when a test produces different results based on operating system family.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.DisableRequireUniquePrefix">
+            <summary>
+            Allow multiple tests to map to the same snapshot file prefix.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.AddScrubber(System.String,System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.AddScrubber(System.String,System.Action{System.Text.StringBuilder,VerifyTests.Counter},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.String,System.StringComparison,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.String,System.StringComparison,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLines(System.String,System.Func{System.String,System.Boolean},VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines matching <paramref name="removeLine" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubEmptyLines(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines containing only whitespace from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubInlineGuids(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Replace inline <see cref="T:System.Guid" />s with a placeholder.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesWithReplace(System.String,System.Func{System.String,System.String},VerifyTests.ScrubberLocation)">
+            <summary>
+            Scrub lines with an optional replace.
+            <paramref name="replaceLine" /> can return the input to ignore the line, or return a different string to replace it.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.String,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubMachineName(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.MachineName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubUserName(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.UserName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.AddScrubber(System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.AddScrubber(System.Action{System.Text.StringBuilder,VerifyTests.Counter},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.StringComparison,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.StringComparison,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLines(System.Func{System.String,System.Boolean},VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines matching <paramref name="removeLine" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubEmptyLines(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines containing only whitespace from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubInlineGuids(VerifyTests.ScrubberLocation)">
+            <summary>
+            Replace inline <see cref="T:System.Guid" />s with a placeholder.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesWithReplace(System.Func{System.String,System.String},VerifyTests.ScrubberLocation)">
+            <summary>
+            Scrub lines with an optional replace.
+            <paramref name="replaceLine" /> can return the input to ignore the line, or return a different string to replace it.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubLinesContaining(VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubMachineName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.MachineName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.ScrubUserName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.UserName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifierSettings.AutoVerify(System.Boolean)">
+            <summary>
+            Automatically accept the results of all tests.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.DisableDiff">
+            <summary>
+            Disable using a diff tool for this test
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseParameters``1(``0[])">
+            <summary>
+            Define the parameter values being used by a parameterised (aka data driven) test.
+            In most cases the parameter values can be automatically resolved.
+            When this is not possible, an exception will be thrown instructing the use of <see cref="M:VerifyTests.VerifySettings.UseParameters(System.Object[])" />
+            Not compatible with <see cref="M:VerifyTests.VerifySettings.UseTextForParameters(System.String)" />.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.IgnoreParametersForVerified(System.Object[])">
+            <summary>
+            Ignore parameters in 'verified' filename resulting in the same verified file for each testcase.
+            Note that the 'received' files contain the parameters.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForRuntime">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForTargetFramework">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForTargetFrameworkAndVersion">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForAssemblyConfiguration">
+            <summary>
+            Use the current test assembly configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForTargetFramework(System.Reflection.Assembly)">
+            <summary>
+            Use <paramref name="assembly" /> TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForTargetFrameworkAndVersion(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForAssemblyConfiguration(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseDirectory(System.String)">
+            <summary>
+            Use a custom directory for the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseTypeName(System.String)">
+            <summary>
+            Use a custom class name for the test results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.VerifySettings.UseFileName(System.String)" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseMethodName(System.String)">
+            <summary>
+            Use a custom method name for the test results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.VerifySettings.UseFileName(System.String)" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseFileName(System.String)">
+            <summary>
+            Use a file name for the test results.
+            Overrides the `{TestClassName}.{TestMethodName}_{Parameters}` parts of the file naming.
+            Where the new file format is `{CurrentDirectory}/{FileName}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.VerifySettings.UseTypeName(System.String)" />, <see cref="M:VerifyTests.VerifySettings.UseMethodName(System.String)" />, or <see cref="M:VerifyTests.VerifySettings.UseParameters(System.Object[])" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseUniqueDirectory">
+            <summary>
+            Use a directory for the test results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}/{targetName}.verified.{extension}`.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForRuntimeAndVersion">
+            <summary>
+            Use the current runtime and runtime version to make the test results unique.
+            Used when a test produces different results based on runtime and runtime version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForArchitecture">
+            <summary>
+            Use the current processor architecture (x86/x64/arm/arm64) to make the test results unique.
+            Used when a test produces different results based on processor architecture.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UniqueForOSPlatform">
+            <summary>
+            Use the operating system family (Linux/Windows/OSX) to make the test results unique.
+            Used when a test produces different results based on operating system family.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.DisableRequireUniquePrefix">
+            <summary>
+            Allow multiple tests to map to the same snapshot file prefix.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseSplitModeForUniqueDirectory">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.DontUseSplitModeForUniqueDirectory">
+            <summary>
+            Dont use the current runtime to make the test results unique.
+            Overrides <see cref="M:VerifyTests.VerifierSettings.UseSplitModeForUniqueDirectory"/>.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AddScrubber(System.String,System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AddScrubber(System.String,System.Action{System.Text.StringBuilder,VerifyTests.Counter},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubMachineName(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.MachineName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubUserName(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.UserName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.String,System.StringComparison,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.String,System.StringComparison,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubInlineGuids(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Replace inline <see cref="T:System.Guid" />s with a placeholder.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLines(System.String,System.Func{System.String,System.Boolean},VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines matching <paramref name="removeLine" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesWithReplace(System.String,System.Func{System.String,System.String},VerifyTests.ScrubberLocation)">
+            <summary>
+            Scrub lines with an optional replace.
+            <paramref name="replaceLine" /> can return the input to ignore the line, or return a different string to replace it.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubEmptyLines(System.String,VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines containing only whitespace from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.String,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubMachineName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.MachineName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubUserName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.UserName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AddScrubber(System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AddScrubber(System.Action{System.Text.StringBuilder,VerifyTests.Counter},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.StringComparison,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.StringComparison,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubInlineGuids(VerifyTests.ScrubberLocation)">
+            <summary>
+            Replace inline <see cref="T:System.Guid" />s with a placeholder.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLines(System.Func{System.String,System.Boolean},VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines matching <paramref name="removeLine" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesWithReplace(System.Func{System.String,System.String},VerifyTests.ScrubberLocation)">
+            <summary>
+            Scrub lines with an optional replace.
+            <paramref name="replaceLine" /> can return the input to ignore the line, or return a different string to replace it.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubEmptyLines(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines containing only whitespace from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.ScrubLinesContaining(VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AppendValue(System.String,System.Object)">
+            <summary>
+            Append a key-value pair to the serialized target.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AppendValues(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Append key-value pairs to the serialized target.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AppendValues(System.Collections.Generic.KeyValuePair{System.String,System.Object}[])">
+            <summary>
+            Append key-value pairs to the serialized target.
+            </summary>
+        </member>
+        <member name="P:VerifyTests.VerifySettings.Context">
+            <summary>
+            Allows extensions to Verify to pass config via <see cref="T:VerifyTests.VerifySettings" />.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.UseTextForParameters(System.String)">
+            <summary>
+            Use a custom text for the `Parameters` part of the file name.
+            Not compatible with <see cref="M:VerifyTests.VerifySettings.UseParameters(System.Object[])" />.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifySettings.AutoVerify(System.Boolean)">
+            <summary>
+            Automatically accept the results of the current test.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AppendValue(System.String,System.Object)">
+            <summary>
+            Append a key-value pair to the serialized target.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AppendValues(System.Collections.Generic.IEnumerable{System.Collections.Generic.KeyValuePair{System.String,System.Object}})">
+            <summary>
+            Append key-value pairs to the serialized target.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AppendValues(System.Collections.Generic.KeyValuePair{System.String,System.Object}[])">
+            <summary>
+            Append key-value pairs to the serialized target.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.IgnoreParametersForVerified(System.Object[])">
+            <summary>
+            Ignore parameters in 'verified' filename resulting in the same verified file for each testcase.
+            Note that the 'received' files contain the parameters.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseParameters(System.Object[])">
+            <summary>
+            Define the parameter values being used by a parameterised (aka data drive) test.
+            In most cases the parameter parameter values can be automatically resolved.
+            When this is not possible, an exception will be thrown instructing the use of <see cref="M:VerifyTests.SettingsTask.UseParameters(System.Object[])" />
+            Not compatible with <see cref="M:VerifyTests.SettingsTask.UseTextForParameters(System.String)" />.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.DisableDiff">
+            <summary>
+            Disable using a diff toll for this test
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForRuntime">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForTargetFramework">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForTargetFrameworkAndVersion">
+            <summary>
+            Use the current test assembly TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForAssemblyConfiguration">
+            <summary>
+            Use the current test assembly configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForTargetFramework(System.Reflection.Assembly)">
+            <summary>
+            Use <paramref name="assembly" /> TargetFrameworkAttribute to make the test results unique.
+            Used when a test produces different results based on TargetFramework.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForTargetFrameworkAndVersion(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> TargetFrameworkAttribute name and version to make the test results unique.
+            Used when a test produces different results based on TargetFramework and TargetFramework version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForAssemblyConfiguration(System.Reflection.Assembly)">
+            <summary>
+            Use the <paramref name="assembly" /> configuration (debug/release) to make the test results unique.
+            Used when a test produces different results based on assembly configuration.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.DisableRequireUniquePrefix">
+            <summary>
+            Allow multiple tests to map to the same snapshot file prefix.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseMethodName(System.String)">
+            <summary>
+            Use a custom method name for the test results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}.{UniqueFor1}.{UniqueFor2}.{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.SettingsTask.UseFileName(System.String)" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseDirectory(System.String)">
+            <summary>
+            Use a custom directory for the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseFileName(System.String)">
+            <summary>
+            Use a file name for the test results.
+            Overrides the `{TestClassName}.{TestMethodName}_{Parameters}` parts of the file naming.
+            Where the new file format is `{CurrentDirectory}/{FileName}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.SettingsTask.UseTypeName(System.String)" />, <see cref="M:VerifyTests.SettingsTask.UseMethodName(System.String)" />, or <see cref="M:VerifyTests.SettingsTask.UseParameters(System.Object[])" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseUniqueDirectory">
+            <summary>
+            Use a directory for the test results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}/{targetName}.verified.{extension}`.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseTypeName(System.String)">
+            <summary>
+            Use a custom class name for the CurrentDirectory results.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}.{UniqueFor1}.{UniqueFor2}.{UniqueForX}.verified.{extension}`.
+            </summary>
+            <remarks>Not compatible with <see cref="M:VerifyTests.SettingsTask.UseFileName(System.String)" />.</remarks>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForRuntimeAndVersion">
+            <summary>
+            Use the current runtime and runtime version to make the test results unique.
+            Used when a test produces different results based on runtime and runtime version.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForArchitecture">
+            <summary>
+            Use the current processor architecture (x86/x64/arm/arm64) to make the test results unique.
+            Used when a test produces different results based on processor architecture.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UniqueForOSPlatform">
+            <summary>
+            Use the operating system family (Linux/Windows/OSX) to make the test results unique.
+            Used when a test produces different results based on operating system family.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AutoVerify(System.Boolean)">
+            <summary>
+            Automatically accept the results of the current test.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseTextForParameters(System.String)">
+            <summary>
+            Use a custom text for the `Parameters` part of the file name.
+            Not compatible with <see cref="M:VerifyTests.SettingsTask.UseParameters(System.Object[])" />.
+            Where the file format is `{CurrentDirectory}/{TestClassName}.{TestMethodName}_{Parameters}_{UniqueFor1}_{UniqueFor2}_{UniqueForX}.verified.{extension}`.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.UseSplitModeForUniqueDirectory">
+            <summary>
+            Use the current runtime to make the test results unique.
+            Used when a test produces different results based on runtime.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.DontUseSplitModeForUniqueDirectory">
+            <summary>
+            Dont use the current runtime to make the test results unique.
+            Overrides <see cref="M:VerifyTests.VerifierSettings.UseSplitModeForUniqueDirectory"/>.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AddScrubber(System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.AddScrubber(System.String,System.Action{System.Text.StringBuilder},VerifyTests.ScrubberLocation)">
+            <summary>
+            Modify the resulting test content using custom code.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubInlineGuids(VerifyTests.ScrubberLocation)">
+            <summary>
+            Replace inline <see cref="T:System.Guid" />s with a placeholder.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubMachineName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.MachineName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubUserName(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove the <see cref="P:System.Environment.UserName" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLinesContaining(System.StringComparison,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLinesContaining(System.StringComparison,VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLines(System.Func{System.String,System.Boolean},VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines matching <paramref name="removeLine" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLinesWithReplace(System.Func{System.String,System.String},VerifyTests.ScrubberLocation)">
+            <summary>
+            Scrub lines with an optional replace.
+            <paramref name="replaceLine" /> can return the input to ignore the line, or return a different string to replace it.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubEmptyLines(VerifyTests.ScrubberLocation)">
+            <summary>
+            Remove any lines containing only whitespace from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLinesContaining(System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.SettingsTask.ScrubLinesContaining(VerifyTests.ScrubberLocation,System.String[])">
+            <summary>
+            Remove any lines containing any of <paramref name="stringToMatch" /> from the test results.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifyJsonWriter.WriteMember(System.Object,System.Object,System.String)">
+            <summary>
+            Writes a property name and value while respecting other custom serialization settings.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.VerifyJsonWriter.Serialize(System.Object)">
+            <summary>
+            Convenience method that calls <see cref="P:VerifyTests.VerifyJsonWriter.Serializer" />.<see cref="M:Argon.JsonSerializer.Serialize(System.IO.TextWriter,System.Object)" /> passing in the writer instance and <paramref name="value" />
+            </summary>
+        </member>
+        <member name="M:VerifyTests.StringBuilderExtensions.AppendLineN(System.Text.StringBuilder)">
+            <summary>
+            Appends a line with a `\n` as the newline character.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.StringBuilderExtensions.AppendLineN(System.Text.StringBuilder,System.String)">
+            <summary>
+            Appends a line with a `\n` as the newline character.
+            </summary>
+        </member>
+        <member name="M:VerifyTests.StringBuilderExtensions.AppendLineN(System.Text.StringBuilder,System.Text.StringBuilder)">
+            <summary>
+            Appends a line with a `\n` as the newline character.
+            </summary>
+        </member>
+    </members>
+</doc>

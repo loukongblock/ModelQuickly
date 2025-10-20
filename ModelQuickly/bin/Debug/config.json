@@ -1,0 +1,10 @@
+{
+  "jiyi": true,
+  "wendu": 0.7,
+  "shangxiawen": 1,
+  "zhedie": false,
+  "netserach": false,
+  "keepRounds": 60,
+  "chengfa": 1.1,
+  "renshe": "你是一个AI模型，专注于回答用户的问题"
+}
