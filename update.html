@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiorraBox - 下载</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: #181818;
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 导航栏（标题栏）样式 */
+        .nav {
+            background: rgba(24, 24, 24, 0.95);
+            padding: 1rem 5%;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #cccccc;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #00b96b;
+        }
+
+        .hub {
+            text-decoration: none;
+        }
+
+        /* 核心提示内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 10rem; /* 避开导航栏 */
+            padding-bottom: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .download-prompt {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            background: rgba(40, 40, 40, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .download-prompt p {
+            font-size: 1.5rem;
+            color: #e6e6e6;
+            line-height: 1.8;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+            }
+
+            .nav-links a {
+                font-size: 0.9rem;
+            }
+
+            .download-prompt p {
+                font-size: 1.2rem;
+            }
+
+            .main-content {
+                padding-top: 8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏（标题栏） -->
+    <nav class="nav">
+        <div class="nav-content">
+            <a href="./index.html" class="hub">
+                <div class="logo">TiorraBox</div>
+            </a>
+            <div class="nav-links">
+                <a href="./login.html">下载</a>
+                <a href="./index.html">首页</a>
+                <a href="#features">功能</a>
+                <a href="#contact">联系我们</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 核心提示内容 -->
+    <div class="main-content">
+        <div class="download-prompt">
+            <p>下载已开始，请耐心等待</p>
+        </div>
+    </div>
+
+    <!-- 引入字体图标（保留备用，若后续需添加图标可直接使用） -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</body>
+</html>
