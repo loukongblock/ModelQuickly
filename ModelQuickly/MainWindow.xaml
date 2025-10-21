@@ -659,12 +659,12 @@ Qwen3-Coder-30B-A3B-Instruct"
             <Grid>
                 <Image Source="./close.png" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,15,15,0" Width="15" Height="15" x:Name="closeupdate" MouseLeftButtonDown="closeupdate_MouseLeftButtonDown"></Image>
                 <Image Source="./logo.png" Width="40" Height="40" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,20,0,0"></Image>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,50,0,0">更新版本</TextBlock>
-                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Foreground="White" Margin="0,85,0,0">Emm...有新的版本可用(´｡• ω •｡`)！</TextBlock>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,50,0,0" x:Name="updatetext">更新版本</TextBlock>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="16" Foreground="White" Margin="0,85,0,0" x:Name="text1">Emm...有新的版本可用(´｡• ω •｡`)！</TextBlock>
                 <Border Width="100" Height="30" Background="#00b96b" CornerRadius="8" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,50,120,0" x:Name="updatebutton" MouseLeftButtonDown="updatebutton_MouseLeftButtonDown" Cursor="Hand">
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="14">更新，冲！</TextBlock>
                 </Border>
-                <Border Width="100" Height="30" Background="#00b96b" CornerRadius="8" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="120,50,0,0" MouseLeftButtonDown="closeupdate_MouseLeftButtonDown" Cursor="Hand">
+                <Border Width="100" Height="30" Background="#00b96b" CornerRadius="8" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="120,50,0,0" MouseLeftButtonDown="closeupdate_MouseLeftButtonDown" Cursor="Hand" x:Name="closeupdateborder">
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="14">额..先不更新吧</TextBlock>
                 </Border>
             </Grid>
