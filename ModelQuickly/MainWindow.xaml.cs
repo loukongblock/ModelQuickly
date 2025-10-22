@@ -243,8 +243,8 @@ namespace ModelQuickly
         private TextBox _ansBox;          // 正在流式输出的 TextBox
         public MainWindow()
         {
-            //IsRunningAsAdmin();
-            //RestartAsAdmin();
+            IsRunningAsAdmin();
+            RestartAsAdmin();
             InitializeComponent();
             input.KeyDown += input_KeyDown;
             Loaded += OnWindowLoaded;
@@ -3264,43 +3264,41 @@ namespace ModelQuickly
             updatebutton.Visibility = Visibility.Collapsed;
             closeupdateborder.Visibility = Visibility.Collapsed;
             updatetext.Text = "正在更新，完成后会自动重启";
-
+            text1.Text = $"当前进度:0%";
             string fileUrl = _updateUrl;
             string fileName = Path.GetFileName(fileUrl);
             string exeDir = AppDomain.CurrentDomain.BaseDirectory;
             string savePath = Path.Combine(exeDir, fileName);
 
-            if (File.Exists(savePath))
+            using (WebClient client = new WebClient())
             {
-                MessageBox.Show("文件已存在，跳过下载。");
-            }
-            else
-            {
-                using (WebClient client = new WebClient())
+                // 实时进度 → text1
+                client.DownloadProgressChanged += async (s, args) =>
                 {
-                    try
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(fileUrl), savePath);
-                        MessageBox.Show("下载完成！");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("下载失败：" + ex.Message);
-                        return; // 下载失败就不继续执行脚本
-                    }
+                    text1.Text = $"当前进度:{args.ProgressPercentage}%";
+                };
+
+                try
+                {
+                    await client.DownloadFileTaskAsync(new Uri(fileUrl), savePath);
+                }
+                catch
+                {
+                    return; // 下载失败就不继续
                 }
             }
 
             // 下载完成后执行脚本
             string batPath1 = Path.Combine(exeDir, "update.bat");
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = batPath1,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                });
-            this.Close();
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = batPath1,
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+
+            this.Close();   // 关闭当前程序
         }
 
         private async void addprompt_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
