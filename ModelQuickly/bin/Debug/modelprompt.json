@@ -1,0 +1,46 @@
+[
+  {
+    "ModelName": "哈基米大模型",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "QuckV3",
+    "SystemPrompt": "You are a helpful assistant."
+  },
+  {
+    "ModelName": "1234",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "122",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "123",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "呵呵呵",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "哈基米",
+    "SystemPrompt": "You are a helpful assistant."
+  },
+  {
+    "ModelName": "叮咚机",
+    "SystemPrompt": "你是一个AI模型，专注于回答用户的问题"
+  },
+  {
+    "ModelName": "12222",
+    "SystemPrompt": "哈基米"
+  },
+  {
+    "ModelName": "92",
+    "SystemPrompt": "你是AI模型，专注于回答用户问题，使用中文回复。"
+  },
+  {
+    "ModelName": "AI",
+    "SystemPrompt": ""
+  }
+]
