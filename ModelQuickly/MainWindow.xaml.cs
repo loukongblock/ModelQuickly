@@ -1373,7 +1373,7 @@ namespace ModelQuickly
                     Width = imgSize,
                     Height = imgSize,
                     Source = bmp,
-                    Stretch = Stretch.Fill,
+                    //Stretch = Stretch.Fill,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center,
                     UseLayoutRounding = true,
