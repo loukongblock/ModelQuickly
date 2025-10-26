@@ -1,6 +1,6 @@
-# 🌌 ModelQuickly | 零代码·全图形·本地大模型工作站(喜欢不要忘记给star~)
+# 🌌 ModelQuickly | 概述
 
-## ✨ 一句话介绍
+## ✨ 介绍
 **下载即用**的图形化本地大模型管家——把Ollama的强大能力装进图形化的优雅界面，**无需命令行，无需配置，一键启动专属模型**。
 
 ---
@@ -19,7 +19,7 @@
 ---
 
 ## 🔥 3 分钟极速体验
-1. 去 [Release](https://github.com/loukongblock/ModelQuickly/releases) 下载
+1. [Release](https://github.com/loukongblock/ModelQuickly/releases) 下载
 2. 双击打开 → 选择一键下载 → 选模型（自动下载模型 + 添加依赖）。
 3. 添加模型 → 点击模型卡片 → 开始聊天。
 
