@@ -53,6 +53,9 @@
     <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.3.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
       <HintPath>..\packages\DocumentFormat.OpenXml.Framework.3.3.0\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
     </Reference>
+    <Reference Include="Emoji.Wpf, Version=0.3.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Emoji.Wpf.0.3.4\lib\net40\Emoji.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="EmptyFiles, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090, processorArchitecture=MSIL">
       <HintPath>..\packages\EmptyFiles.4.1.0\lib\net461\EmptyFiles.dll</HintPath>
     </Reference>
@@ -79,6 +82,9 @@
     </Reference>
     <Reference Include="SimpleInfoName, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c7a34512ecd69090, processorArchitecture=MSIL">
       <HintPath>..\packages\SimpleInfoName.2.1.0\lib\net472\SimpleInfoName.dll</HintPath>
+    </Reference>
+    <Reference Include="Stfu, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Stfu.0.1.1\lib\net40\Stfu.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.5.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -169,6 +175,12 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="Typography.GlyphLayout, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Emoji.Wpf.0.3.4\lib\net40\Typography.GlyphLayout.dll</HintPath>
+    </Reference>
+    <Reference Include="Typography.OpenFont, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Emoji.Wpf.0.3.4\lib\net40\Typography.OpenFont.dll</HintPath>
     </Reference>
     <Reference Include="UglyToad.PdfPig, Version=0.1.8.0, Culture=neutral, PublicKeyToken=605d367334e74123, processorArchitecture=MSIL">
       <HintPath>..\packages\UglyToad.PdfPig.1.7.0-custom-5\lib\net47\UglyToad.PdfPig.dll</HintPath>
@@ -261,7 +273,6 @@
     <Resource Include="favicon.ico" />
     <Resource Include="file.png" />
     <Resource Include="hidewindow.png" />
-    <Resource Include="hunyuanlogo.png" />
     <Resource Include="kimilogo.png" />
     <Resource Include="log.png" />
     <Resource Include="logo.png" />
@@ -299,7 +310,9 @@
     <Error Condition="!Exists('..\packages\EmptyFiles.4.1.0\build\EmptyFiles.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EmptyFiles.4.1.0\build\EmptyFiles.targets'))" />
     <Error Condition="!Exists('..\packages\Verify.19.9.2\build\Verify.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Verify.19.9.2\build\Verify.props'))" />
     <Error Condition="!Exists('..\packages\Verify.19.9.2\build\Verify.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Verify.19.9.2\build\Verify.targets'))" />
+    <Error Condition="!Exists('..\packages\JeremyAnsel.HLSL.Targets.1.0.13\build\JeremyAnsel.HLSL.Targets.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\JeremyAnsel.HLSL.Targets.1.0.13\build\JeremyAnsel.HLSL.Targets.targets'))" />
   </Target>
   <Import Project="..\packages\EmptyFiles.4.1.0\build\EmptyFiles.targets" Condition="Exists('..\packages\EmptyFiles.4.1.0\build\EmptyFiles.targets')" />
   <Import Project="..\packages\Verify.19.9.2\build\Verify.targets" Condition="Exists('..\packages\Verify.19.9.2\build\Verify.targets')" />
+  <Import Project="..\packages\JeremyAnsel.HLSL.Targets.1.0.13\build\JeremyAnsel.HLSL.Targets.targets" Condition="Exists('..\packages\JeremyAnsel.HLSL.Targets.1.0.13\build\JeremyAnsel.HLSL.Targets.targets')" />
 </Project>

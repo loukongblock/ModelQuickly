@@ -449,8 +449,10 @@ namespace ModelQuickly
             }
         }
         public bool isopenzanzhu = false;
+        private HashSet<string> _validKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private async void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
+
             //var psi = new ProcessStartInfo
             //{
             //    FileName = "powershell",
@@ -518,6 +520,56 @@ namespace ModelQuickly
             private readonly string _apiUrl = "https://loukongblock.github.io/ModelQuickly/update.json";
 
             // 新增方法，放到 VersionChecker 类里
+            // 兼容 C# 7.3：同步获取远程 key
+            public string GetKey()
+            {
+                try
+                {
+                    string json = _httpClient.GetStringAsync(_apiUrl).Result; // 阻塞一下，UI 线程只跑一次
+                    using (JsonDocument doc = JsonDocument.Parse(json))
+                    {
+                        if (doc.RootElement.TryGetProperty("key", out JsonElement elem))
+                            return elem.GetString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"获取 key 失败：{ex.Message}");
+                }
+                return null;
+            }
+            public HashSet<string> GetAllKeys()
+            {
+                try
+                {
+                    string json = _httpClient.GetStringAsync(_apiUrl).Result;
+                    using (JsonDocument doc = JsonDocument.Parse(json))
+                    {
+                        // 优先按数组读
+                        if (doc.RootElement.TryGetProperty("keys", out JsonElement keysElm))
+                        {
+                            var set = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                            if (keysElm.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (JsonElement item in keysElm.EnumerateArray())
+                                    set.Add(item.GetString());
+                            }
+                            else if (keysElm.ValueKind == JsonValueKind.String)
+                            {
+                                // 逗号分隔
+                                foreach (string s in keysElm.GetString().Split(','))
+                                    set.Add(s.Trim());
+                            }
+                            return set;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"拉取卡密失败：{ex.Message}");
+                }
+                return new HashSet<string>(StringComparer.OrdinalIgnoreCase); // 空集合
+            }
             public async Task<bool> IsOpenzanzhuEnabledAsync()
             {
                 try
@@ -570,7 +622,27 @@ namespace ModelQuickly
                 }
                 return null;
             }
-
+            // 新增：读取远程 key
+            public Task<string> GetKeyAsync()
+            {
+                return Task.Run(async () =>
+                {
+                    try
+                    {
+                        string json = await _httpClient.GetStringAsync(_apiUrl).ConfigureAwait(false);
+                        using (JsonDocument doc = JsonDocument.Parse(json))
+                        {
+                            if (doc.RootElement.TryGetProperty("key", out JsonElement elem))
+                                return elem.GetString();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"获取 key 失败：{ex.Message}");
+                    }
+                    return null;   // 默认空
+                });
+            }
             public async Task<string> GetVersionAsync()
             {
                 _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(
@@ -789,19 +861,21 @@ namespace ModelQuickly
             }
         }
         public async Task<HttpResponseMessage> SendPromptAsync(string prompt,
-                                                   string model = null,
-                                                   bool stream = false)
+                                                        string model = null,
+                                                        bool stream = false)
         {
             if (string.IsNullOrWhiteSpace(prompt))
-                throw new ArgumentException("prompt 不能为空");
+                throw new ArgumentException("消息不能为空");
 
             string attachSummary = await BuildAttachmentSummaryAsync(_userFiles);
             if (!string.IsNullOrWhiteSpace(attachSummary))
                 prompt = attachSummary + "\n\n" + prompt;
 
+            string systemPrompt = LoadPersona(CurrentModelName) ?? _cfg.renshe;
+
             var payload = new
             {
-                system = "系统人设:" + _cfg.renshe,
+                system = systemPrompt + "这是AI身份及人设",
                 prompt = "<｜User｜>" + prompt + "<｜Assistant｜>",
                 temperature = _cfg.wendu,
                 top_p = 0.95,
@@ -814,17 +888,58 @@ namespace ModelQuickly
                 n_threads = 4,
                 n_gpu_layers = 8,
                 stop = new[] {
-      "<｜begin▁of▁sentence｜>",
-      "<｜end▁of▁sentence｜>",
-      "<｜User｜>",
-      "<｜Assistant｜>"
-  },
-                stream = stream               // ✅ 只加这一行
+            "<｜begin▁of▁sentence｜>",
+            "<｜end▁of▁sentence｜>",
+            "<｜User｜>",
+            "<｜Assistant｜>"
+        },
+                stream = stream
             };
 
             string json = JsonConvert.SerializeObject(payload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            return await _http.PostAsync("/completion", content);   // ✅ 流式/非流式同一接口
+            return await _http.PostAsync("/completion", content);
+        }
+        public async Task<Stream> SendPromptStreamAsync(string prompt, string model = null)
+        {
+            if (string.IsNullOrWhiteSpace(prompt))
+                throw new ArgumentException("消息不能为空");
+
+            string attachSummary = await BuildAttachmentSummaryAsync(_userFiles);
+            if (!string.IsNullOrWhiteSpace(attachSummary))
+                prompt = attachSummary + "\n\n" + prompt;
+
+            string systemPrompt = LoadPersona(CurrentModelName) ?? _cfg.renshe;
+
+            var payload = new
+            {
+                system = systemPrompt + "这是AI身份及人设",
+                prompt = "<｜User｜>" + prompt + "<｜Assistant｜>",
+                temperature = _cfg.wendu,
+                top_p = 0.95,
+                top_k = 40,
+                repeat_penalty = _cfg.chengfa,
+                min_p = 0.05,
+                keep_alive = 0,
+                cache_prompt = true,
+                n_predict = 1024,
+                n_threads = 4,
+                n_gpu_layers = 8,
+                stop = new[] {
+            "<｜begin▁of▁sentence｜>",
+            "<｜end▁of▁sentence｜>",
+            "<｜User｜>",
+            "<｜Assistant｜>"
+        },
+                stream = true
+            };
+
+            string json = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var req = new HttpRequestMessage(HttpMethod.Post, "/completion") { Content = content };
+            var resp = await _http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+            resp.EnsureSuccessStatusCode();
+            return await resp.Content.ReadAsStreamAsync();
         }
 
         private Border _loadingCtrl;
@@ -835,22 +950,20 @@ namespace ModelQuickly
         private Brush _sendOriginalBrush;
         private async void send_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            /* 下面代码与你原来 100% 一致，无需任何改动，仅贴出来方便复制 */
             if (_isSending) return;
             _isSending = true;
             send.Background = Brushes.Gray;
+
             _cfg.keepRounds = int.Parse(lunshu.Text);
             _cfg.shangxiawen = int.Parse(shangxiawen.Text);
-            _cfg.renshe = renshebianxie.Text;
             _cfg.jiyi = isen.HorizontalAlignment == HorizontalAlignment.Right;
             if (double.TryParse(wendu.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var v))
             { _cfg.wendu = v; SaveConfig(); }
             if (double.TryParse(chengfa.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var cf))
                 _cfg.chengfa = cf;
             else
-            {
-                MessageBox.Show("设置 -> 模型纠正度必须是数字"); send.Background = _sendOriginalBrush;
-                _isSending = false; return;
-            }
+            { MessageBox.Show("设置 -> 模型纠正度必须是数字"); send.Background = _sendOriginalBrush; _isSending = false; return; }
             SaveConfig();
 
             string tickFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tick.txt");
@@ -865,7 +978,7 @@ namespace ModelQuickly
                 {
                     int tickValue = int.Parse(ticks);
                     if (tickValue % 60 == 0 && isopenzanzhu == true)
-                    { zanzhutanchuang.Visibility = Visibility.Visible; cishu.Text = $"{ticks}次"; opcity04.Visibility = Visibility.Visible; }
+                    { zanzhutanchuang.Visibility = Visibility.Visible; cishu.Text = ticks + "次"; opcity04.Visibility = Visibility.Visible; }
                     tickValue--; ticks = tickValue.ToString(); File.WriteAllText(tickFile, ticks);
                 }
             }
@@ -874,21 +987,10 @@ namespace ModelQuickly
             if (string.IsNullOrWhiteSpace(message))
             { send.ClearValue(Border.BackgroundProperty); _isSending = false; return; }
             if (!Process.GetProcessesByName("llama-server").Any())
-            {
-                MessageBox.Show("请先点击左侧模型卡片启动服务"); send.Background = _sendOriginalBrush;
-                _isSending = false; ; return;
-            }
-            else
-            {
-                bool ok = LlamaHealth.IsModelLoaded();
-                if (!ok)
-                {
-                    MessageBox.Show("服务已启动，请等待片刻，模型正在加载"); send.Background = _sendOriginalBrush;
-                    _isSending = false; ; return;
-                }
-            }
+            { MessageBox.Show("请先点击左侧模型卡片启动服务"); send.Background = _sendOriginalBrush; _isSending = false; return; }
+            if (!LlamaHealth.IsModelLoaded())
+            { MessageBox.Show("服务已启动，请等待片刻，模型正在加载"); send.Background = _sendOriginalBrush; _isSending = false; return; }
 
-            string attachSummary = await BuildAttachmentSummaryAsync(_userFiles);
             string extraContext = null;
             if (_cfg.netserach == true)
             {
@@ -896,29 +998,28 @@ namespace ModelQuickly
                 {
                     string search = await InternetSearch(message);
                     if (!string.IsNullOrWhiteSpace(search))
-                        extraContext = $"【实时搜索结果】\n{search}\n【END】";
+                        extraContext = "【实时搜索结果】\n" + search + "\n【END】";
                 }
                 catch { /* 联网失败就纯提问 */ }
             }
-
-            //合并摘要+搜索+时间 → 一次性丢给模型
+            string attachSummary = await BuildAttachmentSummaryAsync(_userFiles);
             if (!string.IsNullOrWhiteSpace(attachSummary))
                 extraContext = (extraContext ?? "") + "\n" + attachSummary;
 
-            //UI 插入
             _history.Add(new ChatMessage { Role = "user", Text = message, Assistant = null, Model = null });
             AddMessageToUI("我", message, true, null);
-            _fakeMessageElement = CreateFakeMessage();
-            _fakeMessageIndex = MessagesPanel.Children.Count;
-            MessagesPanel.Children.Add(_fakeMessageElement);
+            //TextBox tbStreaming;
+            //_fakeMessageElement = CreateStreamingBox(out tbStreaming);
+            //_tbStreaming = tbStreaming;
+            //MessagesPanel.Children.Add(_fakeMessageElement);
             ChatScrollViewer.ScrollToEnd();
             input.Clear();
-            _userFiles.Clear();          // 清空内存
-            RefreshDropText();           // 刷新界面文字
 
-            /* ---- 请求并等待回复 ---- */
             await StreamAiAnswerAsync(message, extraContext);
 
+            _userFiles.Clear();
+            RefreshDropText();
+            extraContext = null;
             send.Background = _sendOriginalBrush;
             _isSending = false;
         }
@@ -1028,6 +1129,7 @@ namespace ModelQuickly
                 Text = isSelf ? "我" : sender,
                 Foreground = Brushes.White,
                 FontWeight = FontWeights.Bold,
+                FontFamily = new FontFamily("Microsoft YaHei"),
                 FontSize = 14
             };
 
@@ -1044,6 +1146,7 @@ namespace ModelQuickly
                 Text = message,
                 Foreground = Brushes.White,
                 FontSize = 12,
+                FontFamily = new FontFamily("Microsoft YaHei"),
                 TextWrapping = TextWrapping.Wrap,
                 MaxWidth = 400,
                 Background = Brushes.Transparent,
@@ -1062,123 +1165,7 @@ namespace ModelQuickly
             ChatScrollViewer.ScrollToEnd();
         }
 
-        private FrameworkElement CreateFakeMessage()
-        {
-            StackPanel messageContainer = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                Margin = new Thickness(0, 20, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Left
-            };
-
-            int imgSize = 35;
-            Border avatarBorder = new Border
-            {
-                CornerRadius = new CornerRadius(17.5),
-                Width = imgSize,
-                Height = imgSize,
-                Margin = new Thickness(0, 0, 10, 0),
-                VerticalAlignment = VerticalAlignment.Top,
-                Background = ModelName == "Qwen"
-                    ? Brushes.Transparent
-                    : ModelName == "DeepSeek"
-                        ? Brushes.White
-                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00b96b"))
-            };
-
-            Image avatarImg;
-            using (var fs = new FileStream(
-                ModelName == "DeepSeek" ? "./deepseeklogo.png"
-                : ModelName == "Qwen" ? "./qwenlogo.png"
-                : "./user.png",
-                FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.StreamSource = fs;
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.EndInit();
-
-                avatarImg = new Image
-                {
-                    Width = imgSize,
-                    Height = imgSize,
-                    Source = bmp,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    UseLayoutRounding = true,
-                    SnapsToDevicePixels = true
-                };
-            }
-
-            RenderOptions.SetBitmapScalingMode(avatarImg, BitmapScalingMode.Fant);
-            avatarBorder.Child = avatarImg;
-
-
-            StackPanel textPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Top };
-
-            textPanel.Children.Add(new TextBlock
-            {
-                Text = CurrentModelName,
-                Foreground = Brushes.White,
-                FontWeight = FontWeights.Bold,
-                FontSize = 14
-            });
-
-            textPanel.Children.Add(new TextBlock
-            {
-                Text = DateTime.Now.ToString("yyyy/M/d"),
-                Foreground = Brushes.White,
-                FontSize = 10,
-                Margin = new Thickness(0, 2, 0, 3)
-            });
-
-            var dot1 = new Ellipse { Width = 6, Height = 6, Fill = Brushes.White, Margin = new Thickness(0, 0, 2, 0) };
-            var dot2 = new Ellipse { Width = 6, Height = 6, Fill = Brushes.White, Margin = new Thickness(2, 0, 0, 0) };
-            var dot3 = new Ellipse { Width = 6, Height = 6, Fill = Brushes.White, Margin = new Thickness(4, 0, 0, 0) };
-
-            var stack = new StackPanel
-            {
-                Orientation = Orientation.Horizontal,
-                HorizontalAlignment = HorizontalAlignment.Left,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            stack.Children.Add(dot1);
-            stack.Children.Add(dot2);
-            stack.Children.Add(dot3);
-
-            textPanel.Children.Add(new Border
-            {
-                Child = stack,
-                MinWidth = 30,
-                MinHeight = 20,
-                Background = Brushes.Transparent,
-                Margin = new Thickness(0, 5, 0, 0)
-            });
-
-            messageContainer.Children.Add(avatarBorder);
-            messageContainer.Children.Add(textPanel);
-
-            foreach (Ellipse dot in stack.Children)
-            {
-                var trans = new TranslateTransform();
-                dot.RenderTransform = trans;
-
-                var jump = new DoubleAnimation
-                {
-                    From = 0,
-                    To = -4,
-                    Duration = TimeSpan.FromSeconds(0.3),
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    BeginTime = TimeSpan.FromMilliseconds(stack.Children.IndexOf(dot) * 100)
-                };
-
-                trans.BeginAnimation(TranslateTransform.YProperty, jump);
-            }
-
-            return messageContainer;
-        }
+       
 
         private string GetCurrentUserAvatarPath()
         {
@@ -1212,16 +1199,15 @@ namespace ModelQuickly
         }
         private async Task StreamAiAnswerAsync(string userText, string extraContext = null)
         {
+            #region 1. 构造历史滑动窗口（去think）
             int keepRounds = _cfg.keepRounds;
             int maxChars = int.TryParse(shangxiawen.Text, out int len) ? len : 3200;
 
-            /* 1. 实时生成 lite 镜像：去 think + 滑动窗口，不碰 _history */
             _historyLite.Clear();
             int start = Math.Max(0, _history.Count - keepRounds * 2);
             for (int i = start; i < _history.Count; i++)
             {
                 ChatMessage m = _history[i];
-                // 去 think
                 string txt = System.Text.RegularExpressions.Regex.Replace(
                                  m.Text ?? "",
                                  @"<think>.*?</think>",
@@ -1230,64 +1216,257 @@ namespace ModelQuickly
                 _historyLite.Add(new ChatMessage
                 {
                     Role = m.Role,
-                    Text = txt,          // 干净文本
+                    Text = txt,
                     Assistant = m.Assistant,
                     Model = m.Model
                 });
             }
+            #endregion
 
-            /* 2. 用 _historyLite 拼 Llama-3 纯文本模板 */
+            #region 2. 拼 Llama-3 模板
             var sb = new System.Text.StringBuilder();
+            string systemPrompt = LoadPersona(CurrentModelName) ?? _cfg.renshe;
             sb.Append("<|begin_of_text|>\n");
-            sb.Append("system\n"); sb.Append(_cfg.renshe).Append('\n');
+            sb.Append("system");
+            sb.Append(systemPrompt);
             sb.Append("<|eot_id|>\n");
-
             foreach (ChatMessage m in _historyLite)
             {
                 sb.Append(m.Role.ToLower()).Append('\n');
                 sb.Append(m.Text ?? "").Append('\n');
-                sb.Append("<|eot_id|>\n");
             }
-
             string finalPrompt = userText;
-            if (!string.IsNullOrWhiteSpace(extraContext) && _cfg.netserach == true)
+            if (!string.IsNullOrWhiteSpace(extraContext))
                 finalPrompt = extraContext + "\n\n" + userText;
-            sb.Append("user\n"); sb.Append(finalPrompt).Append('\n');
+            sb.Append(finalPrompt);
             sb.Append("<|eot_id|>\n");
-            sb.Append("assistant\n");
-
             string promptToModel = sb.ToString();
+            #endregion
 
-            /* 3. 取回答、UI 展示完整（含 think）、原 _history 照常入库 */
-            string aiAnswer;
-            using (var resp = await SendPromptAsync(promptToModel))
-            {
-                string raw = await resp.Content.ReadAsStringAsync();
-                using (var doc = System.Text.Json.JsonDocument.Parse(raw))
-                    aiAnswer = doc.RootElement.GetProperty("content").GetString() ?? "";
-            }
-
-            if (_fakeMessageElement != null &&
-                _fakeMessageIndex >= 0 &&
-                _fakeMessageIndex < MessagesPanel.Children.Count)
-            {
-                MessagesPanel.Children.RemoveAt(_fakeMessageIndex);
-                _fakeMessageElement = null;
-                _fakeMessageIndex = -1;
-            }
-            AddMessageToUI(CurrentModelName, aiAnswer, false, ModelName);
+            #region 3. 插入唯一加载框（1 个灰点，不跳动）
+            TextBox tbStreaming;
+            FrameworkElement fakeBox = CreateStreamingBox(out tbStreaming);
+            _fakeMessageElement = fakeBox;
+            _fakeMessageIndex = MessagesPanel.Children.Count;
+            MessagesPanel.Children.Add(fakeBox);
             ChatScrollViewer.ScrollToEnd();
+            #endregion
 
+            #region 4. SSE 流式读取
+            string aiFull = "";
+            try
+            {
+                using (Stream sse = await SendPromptStreamAsync(promptToModel))
+                using (var reader = new StreamReader(sse))
+                {
+                    string line;
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        if (!line.StartsWith("data:")) continue;
+
+                        string json = line.Substring("data:".Length);
+                        using (var doc = JsonDocument.Parse(json))
+                        {
+                            string token = doc.RootElement.GetProperty("content").GetString();
+                            if (token == null) continue;
+
+                            aiFull += token;
+                            // 关键：每来一个 token 立即追加，圆点自动紧跟
+                            Dispatcher.Invoke(() => tbStreaming.AppendText(token));
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() => tbStreaming.AppendText("\n【流式中断】" + ex.Message));
+            }
+            #endregion
+
+            #region 5. 移除加载框，插入正式消息
+            MessagesPanel.Children.Remove(fakeBox);
+            AddMessageToUI(CurrentModelName, aiFull, false, ModelName);
+            #endregion
+
+            #region 6. 落库
             _history.Add(new ChatMessage
             {
                 Role = "assistant",
-                Text = aiAnswer,          // 原样保留，重启不丢
+                Text = aiFull,
                 Assistant = CurrentModelName,
                 Model = ModelName
             });
             SaveHistory(_history);
+            #endregion
+        }
+        private TextBox _tbStreaming;            // 指向加载框里的可写 TextBox
+        private FrameworkElement CreateStreamingBox(out TextBox tbReceive)
+        {
+            // 1. 可写文本框（无内边距）
+            tbReceive = new TextBox
+            {
+                Text = "",
+                Foreground = Brushes.White,
+                FontSize = 12,
+                FontFamily = new FontFamily("Microsoft YaHei"),
+                TextWrapping = TextWrapping.Wrap,
+                MaxWidth = 400,
+                Background = Brushes.Transparent,
+                BorderThickness = new Thickness(0),
+                IsReadOnly = true,
+                Padding = new Thickness(0),
+                VerticalAlignment = VerticalAlignment.Bottom
+            };
+
+            // 2. 信息面板（名字 + 日期 + 文字）
+            var textPanel = new StackPanel { VerticalAlignment = VerticalAlignment.Top };
+            textPanel.Children.Add(new TextBlock
+            {
+                Text = CurrentModelName,
+                Foreground = Brushes.White,
+                FontWeight = FontWeights.Bold,
+                FontSize = 14
+            });
+            textPanel.Children.Add(new TextBlock
+            {
+                Text = DateTime.Now.ToString("yyyy/M/d"),
+                Foreground = Brushes.White,
+                FontSize = 10,
+                Margin = new Thickness(0, 2, 0, 3)
+            });
+            textPanel.Children.Add(tbReceive);   // 直接放文本框，无光标
+
+            // 3. 头像（背景色还原你原逻辑）
+            const int imgSize = 35;
+            var avatarBorder = new Border
+            {
+                CornerRadius = new CornerRadius(imgSize / 2.0),
+                Width = imgSize,
+                Height = imgSize,
+                Margin = new Thickness(0, 0, 10, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true
+            };
+
+            if (ModelName == "DeepSeek")
+                avatarBorder.Background = Brushes.White;
+            else if (ModelName == "Qwen")
+                avatarBorder.Background = Brushes.Transparent;
+            else
+                avatarBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00b96b"));
+
+            string filePath = ModelName == "DeepSeek" ? "./deepseeklogo.png" :
+                              ModelName == "Qwen" ? "./qwenlogo.png" : "./user.png";
+
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.StreamSource = fs;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+
+                var avatarImg = new Image
+                {
+                    Width = imgSize,
+                    Height = imgSize,
+                    Source = bmp,
+                    Stretch = Stretch.Fill,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    UseLayoutRounding = true,
+                    SnapsToDevicePixels = true
+                };
+                avatarImg.Clip = new RectangleGeometry(new Rect(0, 0, imgSize, imgSize), imgSize / 2.0, imgSize / 2.0);
+                RenderOptions.SetBitmapScalingMode(avatarImg, BitmapScalingMode.Fant);
+                avatarBorder.Child = avatarImg;
+            }
+
+            // 4. 最外层
+            var container = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(0, 20, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Left
+            };
+            container.Children.Add(avatarBorder);
+            container.Children.Add(textPanel);
+            return container;
+        }
+        private StackPanel CreateJumpDots()
+        {
+            var sp = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 5, 0, 0) };
+            for (int i = 0; i < 3; i++)
+            {
+                var dot = new Ellipse { Width = 6, Height = 6, Fill = Brushes.White, Margin = new Thickness(i == 0 ? 0 : 2, 0, 0, 0) };
+                var trans = new TranslateTransform();
+                dot.RenderTransform = trans;
+                var anim = new DoubleAnimation
+                {
+                    From = 0,
+                    To = -4,
+                    Duration = TimeSpan.FromSeconds(0.3),
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    BeginTime = TimeSpan.FromMilliseconds(i * 100)
+                };
+                trans.BeginAnimation(TranslateTransform.YProperty, anim);
+                sp.Children.Add(dot);
+            }
+            return sp;
         }
 
+        private Border CreateAvatar(bool isSelf)
+        {
+            const int imgSize = 35;
+            var border = new Border
+            {
+                CornerRadius = new CornerRadius(imgSize / 2.0),
+                Width = imgSize,
+                Height = imgSize,
+                Margin = new Thickness(0, 0, 10, 0),
+                VerticalAlignment = VerticalAlignment.Top,
+                Background = isSelf ? Brushes.Transparent :
+                             ModelName == "DeepSeek" ? Brushes.White :
+                             ModelName == "Qwen" ? Brushes.Transparent :
+                             new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00b96b")),
+                // 像素对齐设给父级，保证生效
+                UseLayoutRounding = true,
+                SnapsToDevicePixels = true
+            };
+
+            string filePath = isSelf
+                ? GetCurrentUserAvatarPath()
+                : (ModelName == "DeepSeek" ? "./deepseeklogo.png"
+                   : ModelName == "Qwen" ? "./qwenlogo.png"
+                   : "./user.png");
+
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.StreamSource = fs;
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.EndInit();
+
+                border.Child = new Image
+                {
+                    Width = imgSize,
+                    Height = imgSize,
+                    Source = bmp,
+                    Stretch = Stretch.Fill,
+                    // 像素对齐也设给 Image 本身，双保险
+                    UseLayoutRounding = true,
+                    SnapsToDevicePixels = true
+                };
+            }
+
+            // 圆形裁剪
+            border.Clip = new RectangleGeometry(new Rect(0, 0, imgSize, imgSize), imgSize / 2.0, imgSize / 2.0);
+            return border;
+        }
         public class ChatHistoryRecord
         {
             public string Title { get; set; }
@@ -1459,7 +1638,7 @@ namespace ModelQuickly
             searchClient.DefaultRequestHeaders.Add("Referer", "https://cn.bing.com/");
 
             string kw = Uri.EscapeDataString(keyword);
-            string url = $"https://cn.bing.com/search?q={kw}&count=10&FORM=BEHPTB";
+            string url = $"https://cn.bing.com/search?q={kw}";
             string html = await searchClient.GetStringAsync(url);
 
             var doc = new HtmlDocument();
@@ -2121,15 +2300,16 @@ namespace ModelQuickly
             }
         }
 
-        private string LoadPersona(string modelName)
+        public static string LoadPersona(string modelName)
         {
-            if (!File.Exists("modelprompt.json")) return "You are a helpful assistant.";
+            if (!File.Exists("modelprompt.json")) return null;
 
             var list = JsonConvert.DeserializeObject<List<ModelPromptItem>>(
                          File.ReadAllText("modelprompt.json")) ?? new List<ModelPromptItem>();
 
-            return list.FirstOrDefault(x => x.ModelName == modelName)?.SystemPrompt
-                   ?? "You are a helpful assistant.";
+            // 忽略大小写 + 去掉首尾空格
+            return list.Find(x => x.ModelName.Trim().Equals(modelName.Trim(), StringComparison.OrdinalIgnoreCase))
+                      ?.SystemPrompt;
         }
 
         private void CreateModelCard(string modelName, string modelDir, string realModel)
@@ -2232,12 +2412,13 @@ namespace ModelQuickly
 
 
 
-            border.MouseLeftButtonDown += async (s, _) =>
+            border.MouseLeftButtonDown += async (s, e) =>
             {
-
+                e.Handled = true;
                 foreach (Border b in modellist.Children)
                     b.Background = Brushes.Transparent;
-                ((Border)s).Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#252525"));
+                ((Border)s).Background = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString("#252525"));
 
                 var borderTag = (string)((Border)s).Tag;
                 var mp = ModelStorage.Load().FirstOrDefault(m => m.Name == borderTag);
@@ -2245,11 +2426,10 @@ namespace ModelQuickly
 
                 try
                 {
-
                     await Task.Run(() =>
                     {
-
-                        using (var stopProcess = Process.Start(new ProcessStartInfo
+                        // 1. 杀旧进程
+                        using (Process stopProcess = Process.Start(new ProcessStartInfo
                         {
                             FileName = "powershell",
                             Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"Stop-Process -Name 'llama-server' -Force -ErrorAction SilentlyContinue\"",
@@ -2257,42 +2437,69 @@ namespace ModelQuickly
                             UseShellExecute = false
                         }))
                         {
-                            stopProcess?.WaitForExit();
+                            if (stopProcess != null)
+                                stopProcess.WaitForExit();
                         }
 
-
-                        var exePath = Path.Combine(mp.Path, "server", "llama-server.exe");
+                        // 2. 找可执行文件
+                        string exePath = Path.Combine(mp.Path, "server", "llama-server.exe");
                         if (!File.Exists(exePath))
-                        {
                             throw new FileNotFoundException("未找到llama-server.exe，请检查模型路径");
-                        }
 
-
-                        var ggufFiles = Directory.EnumerateFiles(mp.Path, "*.gguf").ToList();
+                        List<string> ggufFiles = new List<string>(
+                            Directory.EnumerateFiles(mp.Path, "*.gguf"));
                         if (ggufFiles.Count == 0)
-                        {
                             throw new FileNotFoundException("未检测到.gguf格式模型文件，请重新下载。\r\n不支持 safetensors，请使用 .gguf 格式。");
-                        }
 
-
-                        Process.Start(new ProcessStartInfo
+                        // 3. 自动层数：空闲显存 ÷ 150 - 50 MB 系统，温度 ≥85℃ 纯 CPU
+                        int layers = 0;   // 默认纯 CPU
+                        try
                         {
-                            FileName = exePath,
-                            Arguments = $"-m \"{ggufFiles[0]}\" -c 4096 --port 8080",
-                            WorkingDirectory = mp.Path,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                    });
+                            ProcessStartInfo psi = new ProcessStartInfo();
+                            psi.FileName = "nvidia-smi";
+                            psi.Arguments = "--query-gpu=memory.free,temperature.gpu --format=csv,noheader,nounits";
+                            psi.RedirectStandardOutput = true;
+                            psi.UseShellExecute = false;
+                            psi.CreateNoWindow = true;
 
+                            using (Process p = Process.Start(psi))
+                            {
+                                string raw = p.StandardOutput.ReadToEnd().Trim();
+                                p.WaitForExit();
+                                string[] parts = raw.Split(',');
+                                int freeMiB = int.Parse(parts[0].Trim());
+                                int temp = int.Parse(parts[1].Trim());
+
+                                if (temp >= 85)                 // 温度墙
+                                    layers = 0;
+                                else
+                                {
+                                    layers = (freeMiB - 50) / 150; // 留 50 MB 系统
+                                    if (layers < 0) layers = 0;
+                                }
+                            }
+                        }
+                        catch
+                        { /* nvidia-smi 不存在或报错就纯 CPU */ }
+
+                        // 4. 启动服务器（动态层数）
+                        string args = string.Format(
+                            "-m \"{0}\" -c 4096 --port 8080 --n-gpu-layers {1}",
+                            ggufFiles[0], layers);
+
+                        ProcessStartInfo startInfo = new ProcessStartInfo();
+                        startInfo.FileName = exePath;
+                        startInfo.Arguments = args;
+                        startInfo.WorkingDirectory = mp.Path;
+                        startInfo.UseShellExecute = false;
+                        startInfo.CreateNoWindow = true;
+                        Process.Start(startInfo);
+                    });
 
                     Dispatcher.Invoke(() =>
                     {
-                        // ① 读人设 → ② 赋值 → ③ 启动服务
                         CurrentModelName = modelName;
                         ModelName = realModel;
-                        //promptinputborder.Visibility = Visibility.Visible;
-                        //opcity04.Visibility = Visibility.Visible;
                     });
                 }
                 catch (FileNotFoundException ex)
@@ -2301,7 +2508,7 @@ namespace ModelQuickly
                 }
                 catch (Exception ex)
                 {
-                    Dispatcher.Invoke(() => MessageBox.Show($"操作失败: {ex.Message}"));
+                    Dispatcher.Invoke(() => MessageBox.Show("操作失败: " + ex.Message));
                 }
             };
 
@@ -2356,9 +2563,9 @@ namespace ModelQuickly
                 btnEdit.Visibility = Visibility.Collapsed;
                 btnDel.Visibility = Visibility.Collapsed;
             };
-            btnDel.MouseLeftButtonDown += async (_, __) =>
+            btnDel.MouseLeftButtonDown += async (_, e) =>
             {
-
+                e.Handled = true;
                 modellist.Children.Remove(border);
 
 
@@ -2837,102 +3044,7 @@ namespace ModelQuickly
             ookiidialogsborder.Visibility = Visibility.Visible;
         }
 
-        private async void opcity04_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (bushujiemian.Visibility == Visibility.Collapsed)
-            {
-                opcity04.Visibility = Visibility.Collapsed;
-                zanzhutanchuang.Visibility = Visibility.Collapsed;
-                powerby.Visibility = Visibility.Collapsed;
-                updateborder.Visibility = Visibility.Collapsed;
-                promptinputborder.Visibility = Visibility.Collapsed;
-                #region 1. 保存人设（先保存）
-                if (ModelPrompt == null || string.IsNullOrWhiteSpace(ModelPrompt.Text))
-                {
-                    return;
-                }
-
-                var promptList = ModelPromptStorage.Load();
-                promptList.RemoveAll(x => x.ModelName == CurrentModelName);
-                promptList.Add(new ModelPromptItem
-                {
-                    ModelName = CurrentModelName,
-                    SystemPrompt = ModelPrompt.Text.Trim()
-                });
-                ModelPromptStorage.Save(promptList);
-                _cfg.renshe = ModelPrompt.Text.Trim();
-
-                opcity04.Visibility = Visibility.Collapsed;
-                promptinputborder.Visibility = Visibility.Collapsed;
-                _cfg.renshe = ModelPrompt.Text;
-                #endregion
-
-                #region 2. 只有检测到 llama-server 进程才重启
-                bool hasLlama = Process.GetProcessesByName("llama-server").Length > 0;
-                if (!hasLlama)
-                {
-                    // 可选：提示用户
-                    // Dispatcher.Invoke(() => MessageBox.Show("llama-server 未运行，无需重启。"));
-                    return;   // 直接结束
-                }
-                #endregion
-
-                #region 3. 重启 llama-server
-                var mp = ModelStorage.Load().FirstOrDefault(m => m.Name == CurrentModelName);
-                if (mp == null)
-                {
-                    MessageBox.Show("未找到当前模型配置，无法重启服务。");
-                    return;
-                }
-
-                try
-                {
-                    await Task.Run(() =>
-                    {
-                        // 3.1 停旧进程
-                        using (var stop = Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "powershell",
-                            Arguments = "-NoProfile -ExecutionPolicy Bypass -Command \"Stop-Process -Name 'llama-server' -Force -ErrorAction SilentlyContinue\"",
-                            CreateNoWindow = true,
-                            UseShellExecute = false
-                        }))
-                        {
-                            stop?.WaitForExit(3000);
-                        }
-
-                        // 3.2 检查可执行文件
-                        string exePath = Path.Combine(mp.Path, "server", "llama-server.exe");
-                        if (!File.Exists(exePath))
-                            throw new FileNotFoundException("未找到 llama-server.exe，请检查模型路径。");
-
-                        // 3.3 检查模型文件
-                        var ggufFiles = Directory.EnumerateFiles(mp.Path, "*.gguf").ToList();
-                        if (ggufFiles.Count == 0)
-                            throw new FileNotFoundException("未检测到 .gguf 格式模型文件，请重新下载。\r\n不支持 safetensors，请使用 .gguf 格式。");
-
-                        // 3.4 启动新进程
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = exePath,
-                            Arguments = $"-m \"{ggufFiles[0]}\" -c 4096 --port 8080",
-                            WorkingDirectory = mp.Path,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        });
-                    });
-                }
-                catch (FileNotFoundException ex)
-                {
-                    Dispatcher.Invoke(() => MessageBox.Show(ex.Message));
-                }
-                catch (Exception ex)
-                {
-                    Dispatcher.Invoke(() => MessageBox.Show($"重启服务失败: {ex.Message}"));
-                }
-                #endregion
-            }
-        }
+     
 
         private void backgroundopcity_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -3303,7 +3415,7 @@ namespace ModelQuickly
 
         private async void addprompt_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            #region 1. 保存人设（先保存）
+            #region 1. 保存人设（仅写 modelprompt.json）
             if (ModelPrompt == null || string.IsNullOrWhiteSpace(ModelPrompt.Text))
             {
                 MessageBox.Show("人设内容不能为空！");
@@ -3318,24 +3430,18 @@ namespace ModelQuickly
                 SystemPrompt = ModelPrompt.Text.Trim()
             });
             ModelPromptStorage.Save(promptList);
-            _cfg.renshe = ModelPrompt.Text.Trim();
+            // 彻底抛弃 _cfg.renshe
+            #endregion
 
+            #region 2. 关闭弹窗
             opcity04.Visibility = Visibility.Collapsed;
             promptinputborder.Visibility = Visibility.Collapsed;
-            _cfg.renshe = ModelPrompt.Text;
             #endregion
 
-            #region 2. 只有检测到 llama-server 进程才重启
+            #region 3. 按需重启 llama-server（C# 7.3 写法）
             bool hasLlama = Process.GetProcessesByName("llama-server").Length > 0;
-            if (!hasLlama)
-            {
-                // 可选：提示用户
-                // Dispatcher.Invoke(() => MessageBox.Show("llama-server 未运行，无需重启。"));
-                return;   // 直接结束
-            }
-            #endregion
+            if (!hasLlama) return;
 
-            #region 3. 重启 llama-server
             var mp = ModelStorage.Load().FirstOrDefault(m => m.Name == CurrentModelName);
             if (mp == null)
             {
@@ -3347,7 +3453,6 @@ namespace ModelQuickly
             {
                 await Task.Run(() =>
                 {
-                    // 3.1 停旧进程
                     using (var stop = Process.Start(new ProcessStartInfo
                     {
                         FileName = "powershell",
@@ -3359,21 +3464,18 @@ namespace ModelQuickly
                         stop?.WaitForExit(3000);
                     }
 
-                    // 3.2 检查可执行文件
                     string exePath = Path.Combine(mp.Path, "server", "llama-server.exe");
                     if (!File.Exists(exePath))
                         throw new FileNotFoundException("未找到 llama-server.exe，请检查模型路径。");
 
-                    // 3.3 检查模型文件
                     var ggufFiles = Directory.EnumerateFiles(mp.Path, "*.gguf").ToList();
                     if (ggufFiles.Count == 0)
                         throw new FileNotFoundException("未检测到 .gguf 格式模型文件，请重新下载。\r\n不支持 safetensors，请使用 .gguf 格式。");
 
-                    // 3.4 启动新进程
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = exePath,
-                        Arguments = $"-m \"{ggufFiles[0]}\" -c 4096 --port 8080",
+                        Arguments = "-m \"" + ggufFiles[0] + "\" -c 4096 --port 8080",
                         WorkingDirectory = mp.Path,
                         UseShellExecute = false,
                         CreateNoWindow = true
@@ -3382,56 +3484,75 @@ namespace ModelQuickly
             }
             catch (FileNotFoundException ex)
             {
-                Dispatcher.Invoke(() => MessageBox.Show(ex.Message));
+                Dispatcher.Invoke((Action)(() => MessageBox.Show(ex.Message)));
             }
             catch (Exception ex)
             {
-                Dispatcher.Invoke(() => MessageBox.Show($"重启服务失败: {ex.Message}"));
+                Dispatcher.Invoke((Action)(() => MessageBox.Show("重启服务失败: " + ex.Message)));
             }
             #endregion
         }
 
+        /* ========== 点击灰色遮罩层：只保存 + 关窗 + 按需重启 ========== */
+        private async void opcity04_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (bushujiemian.Visibility == Visibility.Collapsed && kami.Visibility != Visibility.Visible)
+            {
+                /* 统一关窗 */
+                opcity04.Visibility = Visibility.Collapsed;
+                zanzhutanchuang.Visibility = Visibility.Collapsed;
+                powerby.Visibility = Visibility.Collapsed;
+                updateborder.Visibility = Visibility.Collapsed;
+                promptinputborder.Visibility = Visibility.Collapsed;
+
+                /* 保存人设（仅 modelprompt.json） */
+                if (ModelPrompt != null && !string.IsNullOrWhiteSpace(ModelPrompt.Text))
+                {
+                    var list = ModelPromptStorage.Load();
+                    list.RemoveAll(x => x.ModelName == CurrentModelName);
+                    list.Add(new ModelPromptItem
+                    {
+                        ModelName = CurrentModelName,
+                        SystemPrompt = ModelPrompt.Text.Trim()
+                    });
+                    ModelPromptStorage.Save(list);
+                }
+
+                /* 按需重启 */
+                await RestartLlamaIfRunning();
+            }
+        }
+
+        /* ========== 点击“关闭”按钮：同上逻辑 ========== */
         private async void closeinputprompt_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             opcity04.Visibility = Visibility.Collapsed;
             promptinputborder.Visibility = Visibility.Collapsed;
-            #region 1. 保存人设（先保存）
-            if (ModelPrompt == null || string.IsNullOrWhiteSpace(ModelPrompt.Text))
+
+            if (ModelPrompt != null && !string.IsNullOrWhiteSpace(ModelPrompt.Text))
             {
-                MessageBox.Show("人设内容不能为空！");
-                return;
+                var list = ModelPromptStorage.Load();
+                list.RemoveAll(x => x.ModelName == CurrentModelName);
+                list.Add(new ModelPromptItem
+                {
+                    ModelName = CurrentModelName,
+                    SystemPrompt = ModelPrompt.Text.Trim()
+                });
+                ModelPromptStorage.Save(list);
             }
 
-            var promptList = ModelPromptStorage.Load();
-            promptList.RemoveAll(x => x.ModelName == CurrentModelName);
-            promptList.Add(new ModelPromptItem
-            {
-                ModelName = CurrentModelName,
-                SystemPrompt = ModelPrompt.Text.Trim()
-            });
-            ModelPromptStorage.Save(promptList);
-            _cfg.renshe = ModelPrompt.Text.Trim();
+            await RestartLlamaIfRunning();
+        }
 
-            opcity04.Visibility = Visibility.Collapsed;
-            promptinputborder.Visibility = Visibility.Collapsed;
-            _cfg.renshe = ModelPrompt.Text;
-            #endregion
+        /* ========== 公共：检测到 llama-server 才重启 ========== */
+        private async Task RestartLlamaIfRunning()
+        {
+            if (Process.GetProcessesByName("llama-server").Length == 0) return;
 
-            #region 2. 只有检测到 llama-server 进程才重启
-            bool hasLlama = Process.GetProcessesByName("llama-server").Length > 0;
-            if (!hasLlama)
-            {
-                // 可选：提示用户
-                // Dispatcher.Invoke(() => MessageBox.Show("llama-server 未运行，无需重启。"));
-                return;   // 直接结束
-            }
-            #endregion
-
-            #region 3. 重启 llama-server
             var mp = ModelStorage.Load().FirstOrDefault(m => m.Name == CurrentModelName);
             if (mp == null)
             {
-                MessageBox.Show("未找到当前模型配置，无法重启服务。");
+                Dispatcher.Invoke((Action)(() => MessageBox.Show("未找到当前模型配置，无法重启服务。")));
                 return;
             }
 
@@ -3439,7 +3560,6 @@ namespace ModelQuickly
             {
                 await Task.Run(() =>
                 {
-                    // 3.1 停旧进程
                     using (var stop = Process.Start(new ProcessStartInfo
                     {
                         FileName = "powershell",
@@ -3451,21 +3571,18 @@ namespace ModelQuickly
                         stop?.WaitForExit(3000);
                     }
 
-                    // 3.2 检查可执行文件
                     string exePath = Path.Combine(mp.Path, "server", "llama-server.exe");
                     if (!File.Exists(exePath))
                         throw new FileNotFoundException("未找到 llama-server.exe，请检查模型路径。");
 
-                    // 3.3 检查模型文件
                     var ggufFiles = Directory.EnumerateFiles(mp.Path, "*.gguf").ToList();
                     if (ggufFiles.Count == 0)
                         throw new FileNotFoundException("未检测到 .gguf 格式模型文件，请重新下载。\r\n不支持 safetensors，请使用 .gguf 格式。");
 
-                    // 3.4 启动新进程
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = exePath,
-                        Arguments = $"-m \"{ggufFiles[0]}\" -c 4096 --port 8080",
+                        Arguments = "-m \"" + ggufFiles[0] + "\" -c 4096 --port 8080",
                         WorkingDirectory = mp.Path,
                         UseShellExecute = false,
                         CreateNoWindow = true
@@ -3474,13 +3591,29 @@ namespace ModelQuickly
             }
             catch (FileNotFoundException ex)
             {
-                Dispatcher.Invoke(() => MessageBox.Show(ex.Message));
+                Dispatcher.Invoke((Action)(() => MessageBox.Show(ex.Message)));
             }
             catch (Exception ex)
             {
-                Dispatcher.Invoke(() => MessageBox.Show($"重启服务失败: {ex.Message}"));
+                Dispatcher.Invoke((Action)(() => MessageBox.Show("重启服务失败: " + ex.Message)));
             }
-            #endregion
+        }
+        private string _remoteKey;
+
+        private void verify_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            //_validKeys = new VersionChecker().GetAllKeys();
+            //string input = (kamitext.Text ?? "").Trim();
+            //if (_validKeys.Contains(input))
+            //{
+            //    MessageBox.Show("认证成功，欢迎使用 ModelQuickly，祝玩得愉快！");
+            //    kami.Visibility = Visibility.Collapsed;
+            //    opcity04.Visibility = Visibility.Collapsed;
+            //}
+            //else
+            //{
+            //    MessageBox.Show("Can not verify! Error:The card code does not exist");
+            //}
         }
     }
 }

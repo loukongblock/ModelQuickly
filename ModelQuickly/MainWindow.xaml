@@ -14,7 +14,7 @@
     <Grid x:Name="grid" Margin="0">
         <Border Height="40" VerticalAlignment="Top">
             <Grid>
-                <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" x:Name="title">ModelQuickly - v1.0.2 | Alpha</TextBlock>
+                <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,0" x:Name="title">ModelQuickly - v1.0.2</TextBlock>
                 <Border Width="120" Height="30" HorizontalAlignment="Center" CornerRadius="15" Background="Transparent" BorderBrush="#2f2f2f" BorderThickness="1" Margin="300,0,0,0" VerticalAlignment="Center" MouseEnter="Border_MouseEnter_1" MouseLeave="Border_MouseLeave_1" Cursor="Hand" WindowChrome.IsHitTestVisibleInChrome="True" MouseLeftButtonDown="update_MouseLeftButtonDown" x:Name="update" Visibility="Collapsed">
                     <Grid>
                         <Image Source="./update.png" Width="14" Height="14" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0" RenderOptions.BitmapScalingMode="Fant"        UseLayoutRounding="True"
@@ -69,7 +69,7 @@
                         </Image.Clip>
                     </Image>
                 </Border>
-                <Border CornerRadius="25" Background="#181818" Width="35" Height="35" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,55,0,0" BorderBrush="#2f2f2f" BorderThickness="1" Cursor="Hand" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" x:Name="chat" MouseLeftButtonDown="chat_MouseLeftButtonDown">
+                <Border CornerRadius="25" Background="Transparent" Width="35" Height="35" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,55,0,0" BorderBrush="#2f2f2f" BorderThickness="1" Cursor="Hand" MouseEnter="Border_MouseEnter" MouseLeave="Border_MouseLeave" x:Name="chat" MouseLeftButtonDown="chat_MouseLeftButtonDown">
                     <Image        UseLayoutRounding="True"
        SnapsToDevicePixels="True" Source="./chat.png" Width="20" Height="20" RenderOptions.BitmapScalingMode="Fant"></Image>
                 </Border>
@@ -195,7 +195,7 @@
                 </Border>
                 <Border HorizontalAlignment="Right" VerticalAlignment="Bottom" Height="25" Background="#1f1f1f" Width="120" Margin="295,15,15,160" BorderBrush="#2f2f2f" BorderThickness="1"  CornerRadius="6" x:Name="tbborder">
                     <Grid>
-                        <TextBlock x:Name="tbDrop" Foreground="White" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center">已上传0个文件</TextBlock>
+                        <TextBlock x:Name="tbDrop" Foreground="White" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Center">已上传 0 个文件</TextBlock>
                     </Grid>
                 </Border>
                 <Border Width="280" BorderBrush="#2f2f2f" BorderThickness="0,0,1,0" HorizontalAlignment="Left">
@@ -639,6 +639,20 @@ Qwen3-Coder-30B-A3B-Instruct"
 
                 <Border Width="90" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,20" MouseEnter="Border_MouseEnter_1" MouseLeave="Border_MouseLeave_1" CornerRadius="18" x:Name="queding1" MouseLeftButtonDown="queding1_MouseLeftButtonDown">
                     <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="14">确定</TextBlock>
+                </Border>
+            </Grid>
+        </Border>
+        <Border Width="410" Height="190" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#181818" CornerRadius="8" BorderBrush="#2f2f2f" BorderThickness="1" x:Name="kami" Visibility="Collapsed">
+            <Grid>
+                <Image Source="./logo.png" Width="40" Height="40" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,20,0,0"></Image>
+                <TextBlock HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="18" FontWeight="Bold" Foreground="White" Margin="0,30,0,0">神秘验证(瞎写的，填modelquickly)</TextBlock>
+                <Border  Background="#181818" CornerRadius="8" BorderBrush="#2f2f2f" BorderThickness="1" Width="200" Height="35" Margin="0,0,0,10">
+                    <Grid>
+                        <TextBox Background="Transparent" BorderThickness="0" TextAlignment="Center" VerticalAlignment="Center" CaretBrush="White" x:Name="kamitext" Foreground="White"></TextBox>
+                    </Grid>
+                </Border>
+                <Border  CornerRadius="8" Background="#00b96b" Width="200" Height="35" Margin="0,80,0,0" x:Name="verify" MouseLeftButtonDown="verify_MouseLeftButtonDown">
+                    <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Foreground="White">Verify</TextBlock>
                 </Border>
             </Grid>
         </Border>

@@ -126,3 +126,7 @@ D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\obj\Debug\ModelQuickl
 D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\obj\Debug\ModelQui.2296B3C2.Up2Date
 D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\obj\Debug\ModelQuickly.exe
 D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\obj\Debug\ModelQuickly.pdb
+D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\bin\Debug\Emoji.Wpf.dll
+D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\bin\Debug\Stfu.dll
+D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\bin\Debug\Typography.GlyphLayout.dll
+D:\snowflakesclient\ModelQuickly\ModelQuickly\ModelQuickly\bin\Debug\Typography.OpenFont.dll
